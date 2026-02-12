@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Settlement - SplitWise{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-cash"></i> Record Settlement
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Record a payment made between group members to settle expenses.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.paid_by.id_for_label }}" class="form-label">
+                                Paid By <span class="text-danger">*</span>
+                            </label>
+                            {{ form.paid_by }}
+                            {% if form.paid_by.errors %}
+                            <div class="text-danger small">{{ form.paid_by.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.paid_to.id_for_label }}" class="form-label">
+                                Paid To <span class="text-danger">*</span>
+                            </label>
+                            {{ form.paid_to }}
+                            {% if form.paid_to.errors %}
+                            <div class="text-danger small">{{ form.paid_to.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label">
+                            Amount (₹) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                        <div class="text-danger small">{{ form.amount.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.settlement_date.id_for_label }}" class="form-label">
+                            Settlement Date <span class="text-danger">*</span>
+                        </label>
+                        {{ form.settlement_date }}
+                        {% if form.settlement_date.errors %}
+                        <div class="text-danger small">{{ form.settlement_date.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.payment_method.id_for_label }}" class="form-label">
+                            Payment Method
+                        </label>
+                        {{ form.payment_method }}
+                        {% if form.payment_method.errors %}
+                        <div class="text-danger small">{{ form.payment_method.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">e.g., UPI, Cash, Bank Transfer</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            Notes
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Record Settlement
+                        </button>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

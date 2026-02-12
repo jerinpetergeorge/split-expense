@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenses - SplitWise{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-receipt"></i> All Expenses</h2>
+    <a href="{% url 'expense_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Expense
+    </a>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if expense_type == 'all' %}active{% endif %}" href="{% url 'expense_list' %}">
+            All Expenses
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if expense_type == 'personal' %}active{% endif %}" href="{% url 'expense_list' %}?type=personal">
+            Personal
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if expense_type == 'group' %}active{% endif %}" href="{% url 'expense_list' %}?type=group">
+            Group
+        </a>
+    </li>
+</ul>
+
+{% if expenses %}
+<div class="card">
+    <div class="card-body">
+        {% for expense in expenses %}
+        <div class="expense-card card mb-3">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-1 text-center">
+                        {% if expense.expense_type == 'personal' %}
+                            <i class="bi bi-wallet2" style="font-size: 2rem; color: var(--primary-color);"></i>
+                        {% else %}
+                            <i class="bi bi-people" style="font-size: 2rem; color: var(--primary-color);"></i>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-5">
+                        <h6 class="mb-1">{{ expense.description }}</h6>
+                        <small class="text-muted">
+                            {% if expense.expense_type == 'group' %}
+                                <i class="bi bi-people"></i> {{ expense.group.name }}
+                            {% else %}
+                                <i class="bi bi-wallet2"></i> Personal
+                            {% endif %}
+                            • {{ expense.date|date:"M d, Y" }}
+                            {% if expense.category %}
+                            • <i class="bi bi-tag"></i> {{ expense.category.name }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div class="col-md-2">
+                        <small class="text-muted">Paid by</small><br>
+                        <strong>{{ expense.paid_by.full_name }}</strong>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <h5 class="mb-0">{{ expense.amount }}</h5>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <a href="{% url 'expense_detail' expense.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        {% if expense.user == user %}
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'expense_update' expense.pk %}">Edit</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'expense_delete' expense.pk %}">Delete</a></li>
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if expense_type != 'all' %}&type={{ expense_type }}{% endif %}">First</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if expense_type != 'all' %}&type={{ expense_type }}{% endif %}">Previous</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if expense_type != 'all' %}&type={{ expense_type }}{% endif %}">Next</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if expense_type != 'all' %}&type={{ expense_type }}{% endif %}">Last</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="bi bi-receipt" style="font-size: 4rem; color: #ccc;"></i>
+    <h4 class="mt-3">No expenses yet</h4>
+    <p class="text-muted">Start tracking your expenses now!</p>
+    <a href="{% url 'expense_create' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle"></i> Add Your First Expense
+    </a>
+</div>
+{% endif %}
+{% endblock %}

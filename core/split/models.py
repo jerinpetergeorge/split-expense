@@ -1,6 +1,3 @@
-from decimal import Decimal
-
-from django.core.validators import MinValueValidator
 from django.db import models
 from django_extensions.db.models import TimeStampedModel
 from djmoney.models.fields import MoneyField
@@ -63,9 +60,6 @@ class Expense(TimeStampedModel):
         max_digits=14,
         decimal_places=2,
         default_currency="INR",
-        validators=[
-            MinValueValidator(Decimal("0.01")),
-        ],
     )
     expense_type = models.CharField(max_length=10, choices=ExpenseType.choices)
 
@@ -110,9 +104,6 @@ class ExpenseSplit(models.Model):
         max_digits=14,
         decimal_places=2,
         default_currency="INR",
-        validators=[
-            MinValueValidator(Decimal("0.00")),
-        ],
     )
 
     # For percentage splits
@@ -121,13 +112,13 @@ class ExpenseSplit(models.Model):
         decimal_places=2,
         null=True,
         blank=True,
-        validators=[
-            MinValueValidator(Decimal("0.00")),
-        ],
     )
 
     # For share-based splits
-    shares = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1)])
+    shares = models.IntegerField(
+        null=True,
+        blank=True,
+    )
 
     is_settled = models.BooleanField(default=False)
 
@@ -152,9 +143,6 @@ class Settlement(TimeStampedModel):
         max_digits=14,
         decimal_places=2,
         default_currency="INR",
-        validators=[
-            MinValueValidator(Decimal("0.01")),
-        ],
     )
 
     settlement_date = models.DateField()

@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Expense - SplitWise{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-plus-circle"></i>
+                    {% if form.instance.pk %}Edit Expense{% else %}Add New Expense{% endif %}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="expenseForm">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Expense Type -->
+                    <div class="mb-3">
+                        <label for="{{ form.expense_type.id_for_label }}" class="form-label">
+                            Expense Type <span class="text-danger">*</span>
+                        </label>
+                        {{ form.expense_type }}
+                        {% if form.expense_type.errors %}
+                        <div class="text-danger small">{{ form.expense_type.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Group (shown only for group expenses) -->
+                    <div class="mb-3" id="groupField">
+                        <label for="{{ form.group.id_for_label }}" class="form-label">
+                            Group <span class="text-danger">*</span>
+                        </label>
+                        {{ form.group }}
+                        {% if form.group.errors %}
+                        <div class="text-danger small">{{ form.group.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Description <span class="text-danger">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label">
+                            Amount (₹) <span class="text-danger">*</span>
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                        <div class="text-danger small">{{ form.amount.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="{{ form.category.id_for_label }}" class="form-label">
+                            Category <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            {{ form.category }}
+                            <a href="{% url 'category_create' %}" class="btn btn-outline-secondary" target="_blank">
+                                <i class="bi bi-plus"></i> New
+                            </a>
+                        </div>
+                        {% if form.category.errors %}
+                        <div class="text-danger small">{{ form.category.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Paid By -->
+                    <div class="mb-3">
+                        <label for="{{ form.paid_by.id_for_label }}" class="form-label">
+                            Paid By <span class="text-danger">*</span>
+                        </label>
+                        {{ form.paid_by }}
+                        {% if form.paid_by.errors %}
+                        <div class="text-danger small">{{ form.paid_by.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mb-3">
+                        <label for="{{ form.date.id_for_label }}" class="form-label">
+                            Date <span class="text-danger">*</span>
+                        </label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                        <div class="text-danger small">{{ form.date.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            Notes
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Split Form (for group expenses) -->
+                    {% if split_form %}
+                    <hr class="my-4">
+                    <h5 class="mb-3"><i class="bi bi-pie-chart"></i> Split Expense</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">Split Type <span class="text-danger">*</span></label>
+                        {{ split_form.split_type }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Split Among <span class="text-danger">*</span></label>
+                        <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                            {{ split_form.members }}
+                        </div>
+                        {% if split_form.members.errors %}
+                        <div class="text-danger small">{{ split_form.members.errors }}</div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ split_form.members.help_text }}</small>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i>
+                            {% if form.instance.pk %}Update Expense{% else %}Add Expense{% endif %}
+                        </button>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const expenseType = document.getElementById('{{ form.expense_type.id_for_label }}');
+    const groupField = document.getElementById('groupField');
+
+    function toggleGroupField() {
+        if (expenseType.value === 'group') {
+            groupField.style.display = 'block';
+        } else {
+            groupField.style.display = 'none';
+        }
+    }
+
+    // Initial state
+    toggleGroupField();
+
+    // On change
+    expenseType.addEventListener('change', toggleGroupField);
+});
+</script>
+{% endblock %}

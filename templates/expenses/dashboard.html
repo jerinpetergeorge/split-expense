@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load expense_filters %}
+{% block title %}Dashboard - SplitWise{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
+            <div>
+                <a href="{% url 'expense_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Expense
+                </a>
+                <a href="{% url 'group_create' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-people"></i> Create Group
+                </a>
+            </div>
+        </div>
+
+        <!-- Balances Overview -->
+        {% if balances %}
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Your Balances</h5>
+            </div>
+            <div class="card-body">
+                {% for balance in balances %}
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                    <div>
+                        <strong>{{ balance.group.name }}</strong>
+                    </div>
+                    <div>
+                        {% if balance.status == 'owed' %}
+                            <span class="balance-positive">
+                                <i class="bi bi-arrow-down-circle"></i> You are owed ₹{{ balance.balance|abs_value }}
+                            </span>
+                        {% else %}
+                            <span class="balance-negative">
+                                <i class="bi bi-arrow-up-circle"></i> You owe ₹{{ balance.balance|abs_value }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Group Expenses -->
+        <div class="card mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Recent Group Expenses</h5>
+                <a href="{% url 'expense_list' %}?type=group" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_group_expenses %}
+                    {% for expense in recent_group_expenses %}
+                    <div class="expense-card card mb-2">
+                        <div class="card-body py-2">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <strong>{{ expense.description }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="bi bi-people"></i> {{ expense.group.name }}
+                                        • {{ expense.date|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Paid by</small><br>
+                                    {{ expense.paid_by.full_name }}
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <strong>{{ expense.amount }}</strong>
+                                    <br>
+                                    <a href="{% url 'expense_detail' expense.pk %}" class="btn btn-sm btn-outline-primary">
+                                        Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No group expenses yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Your Groups -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Your Groups</h5>
+            </div>
+            <div class="card-body">
+                {% if groups %}
+                    {% for group in groups %}
+                    <div class="group-card card mb-2">
+                        <div class="card-body">
+                            <h6>{{ group.name }}</h6>
+                            <small class="text-muted">
+                                {{ group.expense_count }} expense{{ group.expense_count|pluralize }}
+                            </small>
+                            <div class="mt-2">
+                                <a href="{% url 'group_detail' group.pk %}" class="btn btn-sm btn-primary">
+                                    View Group
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center">No groups yet.</p>
+                    <a href="{% url 'group_create' %}" class="btn btn-sm btn-primary w-100">
+                        Create Your First Group
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Personal Expenses -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-wallet"></i> Personal Expenses</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_personal_expenses %}
+                    {% for expense in recent_personal_expenses %}
+                    <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                        <div>
+                            <strong>{{ expense.description }}</strong>
+                            <br>
+                            <small class="text-muted">{{ expense.date|date:"M d" }}</small>
+                        </div>
+                        <div class="text-end">
+                            <strong>{{ expense.amount }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <a href="{% url 'expense_list' %}?type=personal" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                        View All
+                    </a>
+                {% else %}
+                    <p class="text-muted text-center">No personal expenses yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

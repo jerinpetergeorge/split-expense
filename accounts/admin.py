@@ -33,6 +33,16 @@ class CustomUserAdmin(UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
+    search_fields = ("email",)
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "usable_password", "password1", "password2"),
+            },
+        ),
+    )
 
 
 admin.site.register(User, CustomUserAdmin)

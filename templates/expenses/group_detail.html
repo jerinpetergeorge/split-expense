@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load expense_filters %}
+{% block title %}{{ group.name }} - SplitWise{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="bi bi-people"></i> {{ group.name }}</h2>
+                {% if group.description %}
+                <p class="text-muted">{{ group.description }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <a href="{% url 'expense_create' %}?group_id={{ group.pk }}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Add Expense
+                </a>
+                <a href="{% url 'settlement_create' group.pk %}" class="btn btn-primary">
+                    <i class="bi bi-cash"></i> Settle Up
+                </a>
+                {% if group.created_by == user %}
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'group_update' group.pk %}">Edit Group</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'group_delete' group.pk %}">Delete Group</a></li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Expenses -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Expenses</h5>
+            </div>
+            <div class="card-body">
+                {% if expenses %}
+                    {% for expense in expenses %}
+                    <div class="expense-card card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <h6>{{ expense.description }}</h6>
+                                    <small class="text-muted">
+                                        {{ expense.date|date:"M d, Y" }}
+                                        {% if expense.category %}
+                                        • <i class="bi bi-tag"></i> {{ expense.category.name }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <div class="col-md-3">
+                                    <small class="text-muted">Paid by</small><br>
+                                    <strong>{{ expense.paid_by.full_name }}</strong>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <h5 class="mb-1">{{ expense.amount }}</h5>
+                                    <a href="{% url 'expense_detail' expense.pk %}" class="btn btn-sm btn-outline-primary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-4">No expenses yet. Add your first expense!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Settlements -->
+        {% if settlements %}
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-arrow-left-right"></i> Recent Settlements</h5>
+                <a href="{% url 'settlement_list' group.pk %}" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            <div class="card-body">
+                {% for settlement in settlements %}
+                <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                    <div>
+                        <strong>{{ settlement.paid_by.full_name }}</strong> paid
+                        <strong>{{ settlement.paid_to.full_name }}</strong>
+                        <br>
+                        <small class="text-muted">{{ settlement.settlement_date|date:"M d, Y" }}</small>
+                    </div>
+                    <div>
+                        <strong class="text-success">{{ settlement.amount }}</strong>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Group Members -->
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Members</h5>
+            </div>
+            <div class="card-body">
+                {% for member in group.members.all %}
+                <div class="d-flex align-items-center mb-2">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+                         style="width: 40px; height: 40px;">
+                        {{ member.full_name|first|upper }}
+                    </div>
+                    <div>
+                        <strong>{{ member.full_name }}</strong>
+                        {% if member == group.created_by %}
+                        <span class="badge bg-warning text-dark">Admin</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Balances -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Balances</h5>
+            </div>
+            <div class="card-body">
+                {% for member, data in balances.items %}
+                <div class="mb-3 pb-3 border-bottom">
+                    <strong>{{ member.full_name }}</strong>
+                    <div class="mt-1">
+                        <small class="text-muted">Paid:</small>
+                        <strong>₹{{ data.paid }}</strong>
+                    </div>
+                    <div>
+                        <small class="text-muted">Owes:</small>
+                        <strong>₹{{ data.owed }}</strong>
+                    </div>
+                    <div class="mt-1">
+                        {% if data.balance > 0 %}
+                            <span class="balance-positive">
+                                Gets back ₹{{ data.balance }}
+                            </span>
+                        {% elif data.balance < 0 %}
+                            <span class="balance-negative">
+                                Owes ₹{{ data.balance|abs_value }}
+                            </span>
+                        {% else %}
+                            <span class="text-success">Settled up</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
