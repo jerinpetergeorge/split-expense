@@ -1,47 +1,66 @@
 from pathlib import Path
 
+from environ import Env
+
+env = Env()
+# Option to attach an env file
+# default location is `.envs/env-local.env`
+# if the file not found, simply ignored
+env.read_env(env("ENV_FILE", default=".envs/.env"))
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-0peo@#x9jur3!h$ryje!$879xww8y1y66jx!%*#ymhg&jkozs2"
+# https://docs.djangoproject.com/en/dev/ref/settings/#std:setting-SECRET_KEY
+default_secret = "django-insecure-0peo@#x9jur3!h$ryje!$879xww8y1y66jx!%*#ymhg&jkozs2"
+SECRET_KEY = env("SECRET_KEY", default=default_secret)
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", default=False)
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "0.0.0.0",
+    "127.0.0.1",
+    *env.list("ALLOWED_HOSTS", default=[]),
+]
 
 
 # Application definition
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = [
+BUILTIN_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+]
+DEBUG_TRUE_APPS = [
+    # Apps that should only load in debug mode
+    "debug_toolbar",
+    "whitenoise.runserver_nostatic",
+    "django_su",
+]
+
+THIRD_PARTY_APPS = [
     # Third-party
     "allauth",
     "allauth.account",
     "crispy_forms",
     "crispy_bootstrap5",
-    "debug_toolbar",
-    "django_su",
     "django_extensions",
-    # Local
+]
+LOCAL_APPS = [
     "accounts",
     "pages",
 ]
+INSTALLED_APPS = [*BUILTIN_APPS, *THIRD_PARTY_APPS, *LOCAL_APPS]
+if DEBUG:
+    INSTALLED_APPS += DEBUG_TRUE_APPS
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
@@ -49,13 +68,15 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",  # WhiteNoise
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",  # Django Debug Toolbar
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # django-allauth
 ]
+
+if DEBUG:
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = "config.urls"
@@ -81,24 +102,7 @@ TEMPLATES = [
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-# For Docker/PostgreSQL usage uncomment this and comment the DATABASES config above
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "postgres",
-#         "USER": "postgres",
-#         "PASSWORD": "postgres",
-#         "HOST": "db",  # set in docker-compose.yml
-#         "PORT": 5432,  # default postgres port
-#     }
-# }
+DATABASES = {"default": env.db()}
 
 # Password validation
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
