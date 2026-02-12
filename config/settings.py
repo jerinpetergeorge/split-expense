@@ -204,6 +204,10 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 )
+
+# ---------------------------------------------------------------------------- #
+# ------------------------- django-allauth Settings -------------------------- #
+# ---------------------------------------------------------------------------- #
 # https://django-allauth.readthedocs.io/en/latest/configuration.html
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
@@ -216,6 +220,16 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",  # Alternative local address
 ]
 
+# ---------------------------------------------------------------------------- #
+# -------------------------- django-money Settings --------------------------- #
+# ---------------------------------------------------------------------------- #
+DEFAULT_CURRENCY = "INR"
+CURRENCIES = ["INR"]
+
+
+# ---------------------------------------------------------------------------- #
+# ---------------------- django-dev-superuser Settings ----------------------- #
+# ---------------------------------------------------------------------------- #
 DJANGO_SU_CONFIG = {
     "USERNAME": "jerin@admin.com",
     "PASSWORD": "passme123@#$",

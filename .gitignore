@@ -21,3 +21,4 @@ Lithium_Demo_2025.mp4
 Pipfile*
 .envs
 *.sqlite3
+local/
