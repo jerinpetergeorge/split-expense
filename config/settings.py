@@ -57,8 +57,13 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "accounts",
     "pages",
+    "core.split",
 ]
-INSTALLED_APPS = [*BUILTIN_APPS, *THIRD_PARTY_APPS, *LOCAL_APPS]
+INSTALLED_APPS = [
+    *BUILTIN_APPS,
+    *THIRD_PARTY_APPS,
+    *LOCAL_APPS,
+]
 if DEBUG:
     INSTALLED_APPS += DEBUG_TRUE_APPS
 
