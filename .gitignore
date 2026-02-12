@@ -22,3 +22,4 @@ Pipfile*
 .envs
 *.sqlite3
 local/
+.run/
